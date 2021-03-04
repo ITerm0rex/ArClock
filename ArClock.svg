@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" id="svg">
+<title>Ar(C)lock</title>
+<g id="g">
+	<path id="Hou" stroke="#f00"/>
+	<path id="Min" stroke="#0f0"/>
+	<path id="Sec" stroke="#00f"/>
+	<path id="Day" stroke="#0ff"/>
+	<path id="Dat" stroke="#f0f"/>
+	<path id="Mon" stroke="#ff0"/>
+</g>
+<defs>
+<style type="text/css">
+/*<![CDATA[*/
+#svg,#g {
+	display: inline-block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+	overflow: none;
+	text-align: center;
+	background-color: #222;
+	fill: none;
+}
+/*]]>*/
+</style>
+<script type="text/javascript">
+/*<![CDATA[*/
+"use strict";
+var tau =2*Math.PI,svgroot=document.getElementById("svg"),tsec,tr,raf=window.hasOwnProperty("requestAnimationFrame");
+
+function getPath(radius, theta) {
+var arcSweep = theta>1/2;
+theta -= 1/4;
+return ["M", radius*Math.cos(theta*tau), radius*Math.sin(theta*tau), "A", radius, radius, 0, +arcSweep, 0, 0, -radius].join(" ");
+}
+
+function hwr() {
+var h = svgroot.scrollHeight/2;
+var w = svgroot.scrollWidth/2;
+	return {
+		"hw": [w,h],
+		"r": w<h?w:h
+	}
+}
+
+function rcenter() {
+var t=svgroot.createSVGTransform();
+t.setTranslate.apply(t,hwr().hw);
+document.getElementById("g").transform.baseVal.initialize(t);
+}
+
+function setPath(name,la,indic,t) {
+var path = document.getElementById(name);
+var r = hwr().r;
+var dw = r/128;
+var lw = r/8;
+var sp = lw+dw;
+r-=lw/2;
+r-=la*sp;
+if(0) r*=t!=0;
+t%=indic;
+t=t||indic;
+t-=0.0001;
+
+path.style.strokeDasharray=[r*tau/indic-dw,dw];
+path.style.strokeDashoffset=-dw/2;
+path.style.strokeWidth=lw;
+path.setAttributeNS(null, "d", getPath(r, t/indic));
+}
+
+function update() {
+var r = hwr().r;
+var now = new Date();
+var sec = now.getSeconds();
+if(tsec!=(tsec=sec)||tr!=(tr=r)) {
+var min = now.getMinutes();
+var hou = now.getHours();
+var day = now.getDay();
+var dat = now.getDate();
+var mon = now.getMonth();
+now.setMonth(++mon,0);
+var ml = now.getDate();
+
+setPath("Hou",0,24,hou);
+setPath("Min",1,60,min);
+setPath("Sec",2,60,sec);
+setPath("Day",3,7,day);
+setPath("Dat",4,ml,dat);
+setPath("Mon",5,12,mon);
+
+}
+raf?window.requestAnimationFrame(update):window.setTimeout(update,500);
+}
+
+window.onload = window.onresize = function() {
+	update();
+	rcenter();
+}
+/*]]>*/
+</script>
+</defs>
+</svg>
